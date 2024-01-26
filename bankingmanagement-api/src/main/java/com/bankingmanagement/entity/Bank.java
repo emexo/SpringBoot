@@ -13,7 +13,7 @@ public class Bank implements Serializable {
 
     @Id
     @Column(name = "Bank_Code")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int bankCode;
 
     @Column(name = "Bank_Name")
