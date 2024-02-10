@@ -1,5 +1,7 @@
 package com.bankingmanagement.controller;
 
+import com.bankingmanagement.exception.BankDetailsNotFound;
+import com.bankingmanagement.exception.CustomerNotFoundException;
 import com.bankingmanagement.model.CustomerDTO;
 import com.bankingmanagement.model.CustomerRequest;
 import com.bankingmanagement.service.CustomerService;
@@ -9,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("api/v1/customers")
@@ -16,6 +20,25 @@ public class CustomerController {
 
     @Autowired
     CustomerService customerService;
+
+    // GET http://localhost:9090/api/v1/customers
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> getAllCustomer(){
+        log.info("Inside CustomerController.getAllCustomer");
+
+        List<CustomerDTO> customerDTOList = null;
+        try{
+            customerDTOList = customerService.findAll();
+        }catch (CustomerNotFoundException ex){
+            log.error("Customer not found", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex1){
+            log.error("Exception while getting the customer details", ex1);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        log.info("End of CustomerController.getAllCustomer");
+        return new ResponseEntity<>(customerDTOList, HttpStatus.OK);
+    }
 
     // http://localhost:9090/api/v1/customers?id=2&name=name
     @GetMapping("/{customerId}")
