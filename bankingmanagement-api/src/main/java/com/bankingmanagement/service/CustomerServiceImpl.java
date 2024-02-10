@@ -8,8 +8,11 @@ import com.bankingmanagement.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -17,6 +20,35 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Autowired
     CustomerRepository customerRepository;
+
+    /**
+     * get all customer details
+     * @return
+     * @throws CustomerNotFoundException
+     */
+    @Override
+    public List<CustomerDTO> findAll() throws CustomerNotFoundException {
+        log.info("Inside the CustomerServiceImpl.findAll");
+        List<Customer> customerList = customerRepository.findAll();
+        log.info("Customer details, customerList:{}", customerList);
+
+        if(CollectionUtils.isEmpty(customerList)){
+           log.error("Customer details not found");
+           throw new CustomerNotFoundException("Customer details not found");
+        }
+
+        List<CustomerDTO> customerDTOS = customerList.stream().map(customer -> {
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setCustomerID(customer.getCustomerID());
+            customerDTO.setCustomerName(customer.getCustomerName());
+            customerDTO.setCustomerPhone(customer.getCustomerPhone());
+            customerDTO.setCustomerAddress(customer.getCustomerAddress());
+            return customerDTO;
+        }).collect(Collectors.toList());
+
+        log.info("End of CustomerServiceImpl.findAll");
+        return customerDTOS;
+    }
 
     @Override
     public CustomerDTO findCustomerById(int customerId) throws CustomerNotFoundException {
