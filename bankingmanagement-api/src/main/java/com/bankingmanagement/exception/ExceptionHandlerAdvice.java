@@ -11,8 +11,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
 
+    @ExceptionHandler(CustomerNotFoundException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ExceptionResponse handleCustomerException(CustomerNotFoundException ex, HttpServletRequest request){
+        log.error("Exception while processing branch details ", ex);
+        ExceptionResponse response = new ExceptionResponse();
+        response.setErrorMessage(ex.getMessage());
+        response.setRequestedURI(request.getRequestURI());
+        return  response;
+    }
+
     @ExceptionHandler(BranchDetailsNotFound.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ExceptionResponse handleBranchException(BranchDetailsNotFound ex, HttpServletRequest request){
         log.error("Exception while processing branch details ", ex);
         ExceptionResponse response = new ExceptionResponse();
@@ -22,7 +32,7 @@ public class ExceptionHandlerAdvice {
     }
 
     @ExceptionHandler(BankDetailsNotFound.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ExceptionResponse handleBankException(BankDetailsNotFound ex, HttpServletRequest request){
         log.error("Exception while processing bank details", ex);
         ExceptionResponse response = new ExceptionResponse();

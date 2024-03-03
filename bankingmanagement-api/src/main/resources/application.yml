@@ -14,8 +14,6 @@ spring:
 # To set logs level as per your need.
 logging:
   level:
-    org:
-      springframework: info
     com:
       bankingmanagement: debug
   file:

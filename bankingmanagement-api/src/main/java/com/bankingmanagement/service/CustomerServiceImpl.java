@@ -1,5 +1,6 @@
 package com.bankingmanagement.service;
 
+import com.bankingmanagement.entity.Account;
 import com.bankingmanagement.entity.Customer;
 import com.bankingmanagement.exception.CustomerNotFoundException;
 import com.bankingmanagement.model.CustomerDTO;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +46,9 @@ public class CustomerServiceImpl implements CustomerService{
             customerDTO.setCustomerName(customer.getCustomerName());
             customerDTO.setCustomerPhone(customer.getCustomerPhone());
             customerDTO.setCustomerAddress(customer.getCustomerAddress());
+
+            Set<Account> accounts = customer.getAccountSet();
+
             return customerDTO;
         }).collect(Collectors.toList());
 
@@ -55,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService{
         log.info("Input to CustomerServiceImpl.findCustomerById, customerId:{}", customerId);
 
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
-        if(!customerOptional.isPresent()){
+        if(customerOptional.isEmpty()){
             log.info("Customer details not found for customerId:{} ", customerId);
             throw new CustomerNotFoundException("Customer details not found for the given customerId");
         }
@@ -65,69 +71,106 @@ public class CustomerServiceImpl implements CustomerService{
 
         CustomerDTO customerDTO = new CustomerDTO();
         customerDTO.setCustomerID(customer.getCustomerID());
-        customer.setCustomerName(customer.getCustomerName());
-        customer.setCustomerPhone(customer.getCustomerPhone());
-        customer.setCustomerAddress(customer.getCustomerAddress());
+        customerDTO.setCustomerName(customer.getCustomerName());
+        customerDTO.setCustomerPhone(customer.getCustomerPhone());
+        customerDTO.setCustomerAddress(customer.getCustomerAddress());
+        return customerDTO;
+    }
+
+    @Override
+    public CustomerDTO findCustomerByName(String customerName) throws CustomerNotFoundException {
+        log.info("Input to CustomerServiceImpl.findCustomerByName, customercustomerNameId:{}", customerName);
+
+        Optional<Customer> customerOptional = customerRepository.findByCustomerName(customerName);
+        if(customerOptional.isEmpty()){
+            log.info("Customer details not found for customerId:{} ", customerName);
+            throw new CustomerNotFoundException("Customer details not found for the given customerId");
+        }
+
+        Customer customer = customerOptional.get();
+        log.info("Customer details for the customerId:{}, response:{}", customerName, customer);
+
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setCustomerID(customer.getCustomerID());
+        customerDTO.setCustomerName(customer.getCustomerName());
+        customerDTO.setCustomerPhone(customer.getCustomerPhone());
+        customerDTO.setCustomerAddress(customer.getCustomerAddress());
 
         return customerDTO;
     }
 
     @Override
-    public CustomerDTO saveCustomer(CustomerRequest customerRequest) throws IllegalArgumentException, CustomerNotFoundException {
-        log.info("Input to CustomerServiceImpl.saveCustomer, customerRequest:{}", customerRequest);
+    public CustomerDTO saveCustomer(CustomerRequest customerRequest) throws CustomerNotFoundException {
+        log.info("Inside the CustomerServiceImpl.saveCustomer, customerRequest:{}", customerRequest);
 
-        if(customerRequest == null){
-            log.info("Invalid customer request,customerRequest:{} ", customerRequest);
-            throw new IllegalArgumentException("Invalid customer request,customerRequest");
+        if (Objects.isNull(customerRequest)) {
+            log.error("Invalid customer request");
+            throw new CustomerNotFoundException("Invalid customer request");
         }
+
+        // convert request into entity
         Customer customer = new Customer();
         customer.setCustomerName(customerRequest.getCustomerName());
-        customer.setCustomerPhone(customerRequest.getCustomerPhone());
         customer.setCustomerAddress(customerRequest.getCustomerAddress());
+        customer.setCustomerPhone(customerRequest.getCustomerPhone());
 
-        Customer customer1 = customerRepository.save(customer);
+        Customer customerRes = customerRepository.save(customer);
 
-        if(customer1 == null){
-            log.info("Exception while saving the customer");
-            throw new CustomerNotFoundException("Exception while saving the customer");
+        if (Objects.isNull(customerRes)) {
+            log.error("Customer details not saved");
+            throw new CustomerNotFoundException("Customer details not saved");
         }
 
         CustomerDTO customerDTO = new CustomerDTO();
-        customerDTO.setCustomerID(customer1.getCustomerID());
-        customer.setCustomerName(customer1.getCustomerName());
-        customer.setCustomerPhone(customer1.getCustomerPhone());
-        customer.setCustomerAddress(customer1.getCustomerAddress());
-
-        return null;
+        customerDTO.setCustomerID(customerRes.getCustomerID());
+        customerDTO.setCustomerName(customerRes.getCustomerName());
+        customerDTO.setCustomerPhone(customerRes.getCustomerPhone());
+        customerDTO.setCustomerAddress(customerRes.getCustomerAddress());
+        return customerDTO;
     }
 
     @Override
-    public CustomerDTO updateCustomer(CustomerRequest customerRequest) throws IllegalArgumentException, CustomerNotFoundException {
-        log.info("Input to CustomerServiceImpl.saveCustomer, customerRequest:{}", customerRequest);
+    public CustomerDTO updateCustomer(CustomerRequest customerRequest) throws CustomerNotFoundException {
+        log.info("Inside the CustomerServiceImpl.saveCustomer, customerRequest:{}", customerRequest);
 
-        if(customerRequest == null){
-            log.info("Invalid customer request,customerRequest:{} ", customerRequest);
-            throw new IllegalArgumentException("Invalid customer request,customerRequest");
+        if (Objects.isNull(customerRequest)) {
+            log.error("Invalid customer request");
+            throw new CustomerNotFoundException("Invalid customer request");
         }
-        Customer customer = new Customer();
-        customer.setCustomerID(customerRequest.getCustomerId());
-        customer.setCustomerName(customerRequest.getCustomerName());
-        customer.setCustomerPhone(customerRequest.getCustomerPhone());
-        customer.setCustomerAddress(customerRequest.getCustomerAddress());
 
-        Customer customer1 = customerRepository.save(customer);
+        Optional<Customer> customerOptional = customerRepository.findById(customerRequest.getCustomerId());
 
-        if(customer1 == null){
-            log.info("Exception while saving the customer");
-            throw new CustomerNotFoundException("Exception while saving the customer");
+        if (customerOptional.isEmpty()) {
+            log.error("Invalid customer id, customerId:{}", customerRequest.getCustomerId());
+            throw new CustomerNotFoundException("Invalid customer id, customerId");
+        }
+
+
+        // convert request into entity
+        Customer customer = customerOptional.get();
+            if(!Objects.isNull(customerRequest.getCustomerName()) ) {
+                customer.setCustomerName(customerRequest.getCustomerName());
+            }
+            if(!Objects.isNull(customerRequest.getCustomerAddress()) ) {
+                customer.setCustomerAddress(customerRequest.getCustomerAddress());
+            }
+            if(!Objects.isNull(customerRequest.getCustomerPhone()) ) {
+                customer.setCustomerPhone(customerRequest.getCustomerPhone());
+            }
+
+        Customer customerRes = customerRepository.save(customer);
+
+        if (Objects.isNull(customerRes)) {
+            log.error("Customer details not saved");
+            throw new CustomerNotFoundException("Customer details not saved");
         }
 
         CustomerDTO customerDTO = new CustomerDTO();
-        customerDTO.setCustomerID(customer1.getCustomerID());
-        customer.setCustomerName(customer1.getCustomerName());
-        customer.setCustomerPhone(customer1.getCustomerPhone());
-        customer.setCustomerAddress(customer1.getCustomerAddress());
-
-        return null;
+        customerDTO.setCustomerID(customerRes.getCustomerID());
+        customerDTO.setCustomerName(customerRes.getCustomerName());
+        customerDTO.setCustomerPhone(customerRes.getCustomerPhone());
+        customerDTO.setCustomerAddress(customerRes.getCustomerAddress());
+        return customerDTO;
     }
+
 }

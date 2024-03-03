@@ -12,7 +12,8 @@ public interface CustomerService {
     List<CustomerDTO> findAll() throws CustomerNotFoundException;
 
     CustomerDTO findCustomerById(int customerId) throws CustomerNotFoundException;
+    CustomerDTO findCustomerByName(String customerName) throws CustomerNotFoundException;
 
-    CustomerDTO saveCustomer(CustomerRequest customerRequest) throws IllegalArgumentException, CustomerNotFoundException;
-    CustomerDTO updateCustomer(CustomerRequest customerRequest) throws IllegalArgumentException, CustomerNotFoundException;
+    CustomerDTO saveCustomer(CustomerRequest customerRequest) throws CustomerNotFoundException;
+    CustomerDTO updateCustomer(CustomerRequest customerRequest) throws CustomerNotFoundException;
 }

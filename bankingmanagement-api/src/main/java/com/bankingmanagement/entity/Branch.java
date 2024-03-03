@@ -23,6 +23,7 @@ public class Branch implements Serializable {
     @Column(name = "Branch_Name")
     private String branchName;
 
+
     @Column(name = "Branch_Address")
     private String branchAddress;
 

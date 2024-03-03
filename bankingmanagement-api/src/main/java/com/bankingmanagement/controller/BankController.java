@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +44,9 @@ public class BankController {
                 log.info("Bank details not found");
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+        } catch (BankDetailsNotFound ex1){
+            log.error("Exception while getting bank details", ex1);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } catch (Exception ex){
             log.error("Exception while getting bank details", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

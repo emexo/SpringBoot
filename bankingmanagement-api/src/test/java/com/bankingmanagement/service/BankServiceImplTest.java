@@ -29,7 +29,7 @@ public class BankServiceImplTest {
     private BankServiceImpl bankService;
 
     @Test
-    public void testFindAll() throws BankDetailsNotFound {
+    public void findAll_whenValidInput_thenReturnsBankDetails() throws BankDetailsNotFound {
         Bank bank = new Bank();
         bank.setBankCode(999);
         bank.setBankName("SBI");
@@ -57,7 +57,7 @@ public class BankServiceImplTest {
         Set<Branch> branches = new HashSet<>();
         branches.add(branch);
 
-        bank.setBranchSet(branches);
+        //bank.setBranchSet(branches);
         List<Bank> banks = new ArrayList<>();
         banks.add(bank);
 
@@ -91,8 +91,8 @@ public class BankServiceImplTest {
 
     @Test(expected = BankDetailsNotFound.class)
     public void testFindBankDetailsWithInvalidInput() throws BankDetailsNotFound {
-
-        BankDTO bankDTO = bankService.findBankDetails(0);
+        when(bankRepository.findById(anyInt())).thenReturn(Optional.ofNullable(null));
+        BankDTO bankDTO = bankService.findBankDetails(999);
         assertNull(bankDTO);
     }
 }

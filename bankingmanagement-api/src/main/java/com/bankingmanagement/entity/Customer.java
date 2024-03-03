@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name="Customer")
+@Table(name="Customer_TBL")
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

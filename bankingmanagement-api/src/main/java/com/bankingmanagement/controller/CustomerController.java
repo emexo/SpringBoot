@@ -5,6 +5,9 @@ import com.bankingmanagement.exception.CustomerNotFoundException;
 import com.bankingmanagement.model.CustomerDTO;
 import com.bankingmanagement.model.CustomerRequest;
 import com.bankingmanagement.service.CustomerService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/customers")
+@RequestMapping("/api/v1/customers")
 public class CustomerController {
 
     @Autowired
@@ -40,77 +43,61 @@ public class CustomerController {
         return new ResponseEntity<>(customerDTOList, HttpStatus.OK);
     }
 
-    // http://localhost:9090/api/v1/customers?id=2&name=name
+    // http://localhost:9090/api/v1/customers?id=2 - requestParam
+    // http://localhost:9090/api/v1/customers/2/name  - PathVariable
     @GetMapping("/{customerId}")
-    public ResponseEntity<CustomerDTO> findCustomerById(@PathVariable("customerId") int customerId){
+    public ResponseEntity<CustomerDTO> findCustomerById(@PathVariable("customerId") int customerId) throws CustomerNotFoundException, Exception {
         log.info("Inside CustomerController.findCustomerById, customerId:{}", customerId);
 
-        if(customerId <=0){
-            log.info("Invalid customer id, customerId:{}", customerId);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
         CustomerDTO customerDTO = null;
-        try{
-            customerDTO = customerService.findCustomerById(customerId);
-            log.info("Customer details for the customerId:{} and response:{}", customerId, customerDTO);
+        customerDTO = customerService.findCustomerById(customerId);
+        log.info("Customer details for the customerId:{} and response:{}", customerId, customerDTO);
 
-            if(customerDTO == null){
-                log.info("Customer details not found for the customerId:{}", customerId);
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception ex){
-            log.error("Exception while getting customer details", ex);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (customerDTO == null) {
+            log.info("Customer details not found for the customerId:{}", customerId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         return new ResponseEntity<>(customerDTO, HttpStatus.OK);
     }
 
+    // http://localhost:9090/api/v1/customers/byname?name=Regu - requestParam
+    @GetMapping("/byname")
+    public ResponseEntity<CustomerDTO> findCustomerByName(@RequestParam("name") String customerName) throws CustomerNotFoundException, Exception {
+        log.info("Inside CustomerController.findCustomerById, customerName:{}", customerName);
+
+        CustomerDTO customerDTO = null;
+        customerDTO = customerService.findCustomerByName(customerName);
+        log.info("Customer details for the customerId:{} and response:{}", customerName, customerDTO);
+
+        if (customerDTO == null) {
+            log.info("Customer details not found for the customerId:{}", customerName);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
+    }
+
+    // POST http://localhost:9090/api/v1/customers
+
     @PostMapping
-    public ResponseEntity<CustomerDTO> saveCustomer(@RequestBody CustomerRequest customerRequest){
-        log.info("Inside CustomerController.saveCustomer, customerRequest:{}", customerRequest);
-        if(customerRequest == null) {
-            log.info("Invalid customer request, customerRequest:{}", customerRequest);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        CustomerDTO  customerDTO = null;
-        try {
-            customerDTO = customerService.saveCustomer(customerRequest);
-            log.info("Customer details, customerDTO:{}", customerDTO);
+    public ResponseEntity<CustomerDTO> saveCustomer(@RequestBody @Valid CustomerRequest customerRequest) throws CustomerNotFoundException, Exception {
+        log.info("Inside the CustomerController.saveCustomer, customerRequest:{}", customerRequest);
 
-            if(customerDTO == null) {
-                log.info("Customer details not found for the customerDTO:{}", customerDTO);
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception ex){
-            log.error("Exception while getting saving customer details", ex);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        CustomerDTO customerDTO = customerService.saveCustomer(customerRequest);
 
-        return new ResponseEntity<CustomerDTO>(customerDTO, HttpStatus.OK);
+        log.info("End of CustomerController.saveCustomer");
+        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<CustomerDTO> updateCustomer(@RequestBody CustomerRequest customerRequest){
-        log.info("Inside CustomerController.saveCustomer, customerRequest:{}", customerRequest);
-        if(customerRequest == null) {
-            log.info("Invalid customer request, customerRequest:{}", customerRequest);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        CustomerDTO  customerDTO = null;
-        try {
-            customerDTO = customerService.saveCustomer(customerRequest);
-            log.info("Customer details, customerDTO:{}", customerDTO);
+    @PutMapping // idempotent
+    public ResponseEntity<CustomerDTO> updateCustomer(@RequestBody @Valid CustomerRequest customerRequest) throws CustomerNotFoundException, Exception {
+        log.info("Inside the CustomerController.updateCustomer, customerRequest:{}", customerRequest);
 
-            if(customerDTO == null) {
-                log.info("Customer details not found for the customerDTO:{}", customerDTO);
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception ex){
-            log.error("Exception while getting saving customer details", ex);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        CustomerDTO customerDTO = customerService.updateCustomer(customerRequest);
 
-        return new ResponseEntity<CustomerDTO>(customerDTO, HttpStatus.OK);
+        log.info("End of CustomerController.updateCustomer");
+        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
     }
+
 }

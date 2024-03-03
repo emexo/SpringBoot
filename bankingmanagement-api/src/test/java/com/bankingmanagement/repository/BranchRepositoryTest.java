@@ -19,7 +19,7 @@ public class BranchRepositoryTest {
     BranchRepository branchRepository;
 
     @Test
-    public void testFindByBranchName(){
+    public void findByBranchName_whenValidInput_thenSaveBranchDetails(){
         saveBranch();
         Optional<Branch>  branchOptional = branchRepository.findByBranchName("BTM");
         assertEquals("BTM", branchOptional.get().getBranchName());
