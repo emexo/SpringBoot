@@ -29,7 +29,7 @@ import javax.inject.Named;
 @Component
 public class User {
 
-    @Resource
+    @Autowired
     Honda toyota;
 
 
