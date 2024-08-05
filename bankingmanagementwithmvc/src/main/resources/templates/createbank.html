@@ -4,34 +4,47 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <title>Trackzilla Applications</title>
+    <style type="text/css">
+    label {
+        display: inline-block;
+        width: 200px;
+        margin: 5px;
+        text-align: left;
+    }
+    input[type=text], input[type=password], select {
+        display: inline-block;
+        width: 200px;
+    }
+    input[type=radio] {
+        margin-left: 45px;
+    }
+    input[type=checkbox] {
+        margin-right: 190px;
+    }
+    button {
+        padding: 5px;
+        margin: 10px;
+    }
+</style>
+    <title>Banking Applications</title>
 </head>
 <body>
 <div class="container">
     <div th:insert="fragments/navbar.html"> </div>
     <div class="jumbotron">
-        <h3>Banks</h3>
-<table class="table table-striped">
-    <thead class="thead-dark">
-    <tr>
-        <th scope="col">Bank Code</th>
-        <th scope="col">Bank Name</th>
-        <th scope="col">Bank Address</th>
-        <th scope="col">Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr><td th:text="${error}" colspan="4" align="center"></td> </tr>
-    <tr th:each="item : ${banks}">
-        <td th:text="${item.bankCode}"></td>
-        <td th:text="${item.bankName}"></td>
-        <td th:text="${item.bankAddress}"></td>
-        <td><a th:href="@{'/banks/delete/' + ${item.bankCode}}">Delete</a>
-            <a th:href="@{'/banks/edit/' + ${item.bankCode}}">Edit</a></td>
-    </tr>
-    </tbody>
-</table>
+        <div align="center">
+            <h2>Create Bank</h2>
+            <br>
+            <form action="#" th:action="@{/banks/save}" method="post" th:object="${bank}">
+                <label>Bank name:</label>
+                <input type="text" th:field="*{bankName}" /><br/>
+
+                <label>Bank Address:</label>
+                <input type="text" th:field="*{bankAddress}" /><br/>
+
+                <button type="submit">Save</button>
+            </form>
+        </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
